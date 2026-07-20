@@ -15,4 +15,16 @@ public static class CommentMappers
             CreatedOn = commentModel.CreatedOn
         };
     }
+    
+    public static Comment ToCommentFromCreateDto(this CreateCommentRequestDto commentModel)
+    {
+        return new Comment
+        {
+            
+            Title = commentModel.Title,
+            Content = commentModel.Content,
+            CreatedOn = commentModel.CreatedOn
+            
+        };
+    }
 }

@@ -25,7 +25,18 @@ public class StockController : ControllerBase
 		 .ToList();
         return Ok(stocks);
     }
+    
+    [HttpGet("comments")]
 
+    public IActionResult GetAllInfo()
+    {
+        var stocks = _context.Stocks
+            .Include(s => s.Comments)
+            .Select(s => s.ToStockWithCommentsDto())
+            .ToList();
+        return Ok(stocks);
+    }
+    
     [HttpGet("{id}")]
 
     public IActionResult GetById([FromRoute] int id)
@@ -39,18 +50,7 @@ public class StockController : ControllerBase
         return Ok(stocks.ToStockDto());
     }
 
-	[HttpGet("moreinfo")]
-
-    public IActionResult GetAllInfo()
-    {
-        var stocks = _context.Stocks
- 		 .Include(s => s.Comments)
-		 .Select(s => s.ToStockWithCommentsDto())
-		 .ToList();
-        return Ok(stocks);
-    }
-	
-	[HttpGet("moreinfo/{id}")]
+	[HttpGet("comments/{id}")]
 
     public IActionResult GetByIdAllInfo([FromRoute] int id)
     {
@@ -69,9 +69,30 @@ public class StockController : ControllerBase
     public IActionResult Create([FromBody] CreateStockRequestDto stockDto)
     {
         var stockModel = stockDto.ToStockFromCreateDTO();
+        
         _context.Stocks.Add(stockModel);
         _context.SaveChanges();
 
-        return CreatedAtAction(nameof(GetById), new { id = stockModel.Id }, stockModel.ToStockDto());
+        return CreatedAtAction(
+            nameof(GetById), 
+            new { id = stockModel.Id }, 
+            stockModel.ToStockDto()
+            );
     }
+    
+    [HttpPost("comments")]
+    public IActionResult CreateWithComments([FromBody] CreateStockRequestWithCommentsDto stockDto)
+    {
+        var stockModel = stockDto.ToStockFromCreateDto();
+        
+        _context.Stocks.Add(stockModel);
+        _context.SaveChanges();
+
+        return CreatedAtAction(
+            nameof(GetByIdAllInfo), 
+            new { id = stockModel.Id }, 
+            stockModel.ToStockWithCommentsDto()
+        );
+    }
+    
 }

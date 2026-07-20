@@ -37,7 +37,7 @@ public static class StockMappers
         };
     }
 
-    public static Stock ToStockFromCreateDTO(this CreateStockRequestDto stockModel)
+    public static Stock ToStockFromCreateDTO(this CreateStockRequestDto stockModel) // WITHOUT comments
     {
         return new Stock
         {
@@ -49,4 +49,21 @@ public static class StockMappers
             MarketCap = stockModel.MarketCap
         };
     }
-}
+
+    public static Stock ToStockFromCreateDto(this CreateStockRequestWithCommentsDto stockModel) // WITH comments
+    {
+        return new Stock
+        {
+            Symbol = stockModel.Symbol,
+            CompanyName = stockModel.CompanyName,
+            Purchase = stockModel.Purchase,
+            LastDiv = stockModel.LastDiv,
+            Industry = stockModel.Industry,
+            MarketCap = stockModel.MarketCap,
+
+            Comments = stockModel.Comments
+                .Select(c => c.ToCommentFromCreateDto())
+                .ToList()
+        };
+    }
+}   
