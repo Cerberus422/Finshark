@@ -30,10 +30,23 @@ public static class StockMappers
             LastDiv = stockModel.LastDiv,
             Industry = stockModel.Industry,
             MarketCap = stockModel.MarketCap,
-            
+
             Comments = stockModel.Comments
                 .Select(c => c.ToCommentDto())
                 .ToList()
+        };
+    }
+
+    public static Stock ToStockFromCreateDTO(this CreateStockRequestDto stockModel)
+    {
+        return new Stock
+        {
+            Symbol = stockModel.Symbol,
+            CompanyName = stockModel.CompanyName,
+            Purchase = stockModel.Purchase,
+            LastDiv = stockModel.LastDiv,
+            Industry = stockModel.Industry,
+            MarketCap = stockModel.MarketCap
         };
     }
 }
