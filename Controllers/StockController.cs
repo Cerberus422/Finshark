@@ -37,30 +37,4 @@ public class StockController : ControllerBase
         }
         return Ok(stocks.ToStockDto());
     }
-
-	[HttpGet("moreinfo")]
-
-    public IActionResult GetAllInfo()
-    {
-        var stocks = _context.Stocks
- 		 .Include(s => s.Comments)
-		 .Select(s => s.ToStockWithCommentsDto())
-		 .ToList();
-        return Ok(stocks);
-    }
-	
-	[HttpGet("moreinfo/{id}")]
-
-    public IActionResult GetByIdAllInfo([FromRoute] int id)
-    {
-        var stocks = _context.Stocks
-		 .Include(s => s.Comments)
-		 .FirstOrDefault(s => s.Id == id);
-
-        if (stocks == null)
-        {
-            return NotFound();
-        }
-        return Ok(stocks.ToStockWithCommentsDto());
-    }
 }
