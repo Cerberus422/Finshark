@@ -15,3 +15,4 @@
 /httpRequests/
 bin/
 obj/
+.idea/
