@@ -2,6 +2,7 @@
 using api.Mappers;
 using api.Data;
 using api.Dtos.Stock;
+using api.Dtos.Comment;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers;
@@ -16,9 +17,9 @@ public class StockController : ControllerBase
         _context = context;
     }
 
-    [HttpGet]
+    [HttpGet]   // All Stocks
 
-    public IActionResult GetAll()
+    public IActionResult GetAllStocks()
     {
         var stocks = _context.Stocks
 		 .Select(s => s.ToStockDto())
@@ -26,9 +27,9 @@ public class StockController : ControllerBase
         return Ok(stocks);
     }
     
-    [HttpGet("comments")]
+    [HttpGet("stocks-with-comments")]   // All Stocks with Comments
 
-    public IActionResult GetAllInfo()
+    public IActionResult GetAllStocksWithComments()
     {
         var stocks = _context.Stocks
             .Include(s => s.Comments)
@@ -37,9 +38,9 @@ public class StockController : ControllerBase
         return Ok(stocks);
     }
     
-    [HttpGet("{id}")]
+    [HttpGet("{id}")]   // Stock by Id
 
-    public IActionResult GetById([FromRoute] int id)
+    public IActionResult GetStockById([FromRoute] int id)
     {
         var stocks = _context.Stocks.Find(id);
 
@@ -50,9 +51,9 @@ public class StockController : ControllerBase
         return Ok(stocks.ToStockDto());
     }
 
-	[HttpGet("comments/{id}")]
+	[HttpGet("stocks-with-comments/{id}")]  // Stocks with Comments by Id
 
-    public IActionResult GetByIdAllInfo([FromRoute] int id)
+    public IActionResult GetByIdStocksAndComments([FromRoute] int id)
     {
         var stocks = _context.Stocks
 		 .Include(s => s.Comments)
@@ -65,8 +66,8 @@ public class StockController : ControllerBase
         return Ok(stocks.ToStockWithCommentsDto());
     }
 
-    [HttpPost]
-    public IActionResult Create([FromBody] CreateStockRequestDto stockDto)
+    [HttpPost]  // Posting Stock
+    public IActionResult CreateStock([FromBody] CreateStockRequestDto stockDto)
     {
         var stockModel = stockDto.ToStockFromCreateDTO();
         
@@ -74,14 +75,36 @@ public class StockController : ControllerBase
         _context.SaveChanges();
 
         return CreatedAtAction(
-            nameof(GetById), 
+            nameof(GetStockById), 
             new { id = stockModel.Id }, 
             stockModel.ToStockDto()
             );
     }
     
-    [HttpPost("comments")]
-    public IActionResult CreateWithComments([FromBody] CreateStockRequestWithCommentsDto stockDto)
+    [HttpPost("write-comments/{id}")] // Posting new Comment to existing Stock
+    public IActionResult CreateComment([FromRoute] int id, [FromBody] CreateCommentRequestDto commentDto)
+    {
+        var stockModel = _context.Stocks.Include(s => s.Comments).FirstOrDefault(s => s.Id == id);
+
+        if (stockModel == null)
+        {
+            return NotFound();
+        }
+
+        var comment = commentDto.ToCommentFromCreateDto();
+
+        comment.StockId  = id;
+        
+        _context.Comments.Add(comment);
+        _context.SaveChanges();
+        
+        var updatedStockModel = _context.Stocks.Include(s => s.Comments).FirstOrDefault(s => s.Id == id);
+
+        return Ok(updatedStockModel.ToStockWithCommentsDto());
+    }
+    
+    [HttpPost("write-stocks-and-comments")]  // Posting Stocks with Comments
+    public IActionResult CreateStockWithComments([FromBody] CreateStockRequestWithCommentsDto stockDto)
     {
         var stockModel = stockDto.ToStockFromCreateDto();
         
@@ -89,10 +112,69 @@ public class StockController : ControllerBase
         _context.SaveChanges();
 
         return CreatedAtAction(
-            nameof(GetByIdAllInfo), 
+            nameof(GetByIdStocksAndComments), 
             new { id = stockModel.Id }, 
             stockModel.ToStockWithCommentsDto()
         );
     }
-    
+
+    [HttpPut("update-stocks/{id}")] // Updating Stock by Id
+
+    public IActionResult UpdateStocks([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
+    {
+        var stockModel = _context.Stocks.FirstOrDefault(s => s.Id == id);
+
+        if (stockModel == null)
+        {
+            return NotFound();
+        }
+        
+        stockModel.Symbol = updateDto.Symbol;
+        stockModel.CompanyName = updateDto.CompanyName;
+        stockModel.Purchase = updateDto.Purchase;
+        stockModel.LastDiv = updateDto.LastDiv;
+        stockModel.Industry = updateDto.Industry;
+        stockModel.MarketCap = updateDto.MarketCap;
+
+        _context.SaveChanges();
+
+        return Ok(stockModel.ToStockDto());
+    }
+
+    [HttpPut("update-stocks-and-comments/{id}")] // Updating Stock and Comments by Id
+
+    public IActionResult UpdateStocksWithComments([FromRoute] int id, [FromBody] UpdateStockWithCommentsRequestDto updateDto)
+    {
+        var stockModel = _context.Stocks.Include(s => s.Comments).FirstOrDefault(s => s.Id == id);
+
+        if (stockModel == null)
+        {
+            return NotFound();
+        }
+        
+        stockModel.Symbol = updateDto.Symbol;
+        stockModel.CompanyName = updateDto.CompanyName;
+        stockModel.Purchase = updateDto.Purchase;
+        stockModel.LastDiv = updateDto.LastDiv;
+        stockModel.Industry = updateDto.Industry;
+        stockModel.MarketCap = updateDto.MarketCap;
+        
+       foreach(var commentDto in updateDto.Comments)
+       {
+           var comment = stockModel.Comments.FirstOrDefault(c => c.Id == commentDto.Id);
+
+           if (comment == null)
+           {
+               continue;
+           }
+           
+           comment.Title = commentDto.Title;
+           comment.Content = commentDto.Content;
+           comment.CreatedOn = commentDto.CreatedOn;
+       }
+        
+        _context.SaveChanges();
+        
+        return Ok(stockModel.ToStockWithCommentsDto());
+    }
 }
