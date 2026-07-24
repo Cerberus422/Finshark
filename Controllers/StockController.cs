@@ -15,6 +15,7 @@ public class StockController : ControllerBase
         _context = context;
     }
 
+    // Get
     [HttpGet] // All Stocks
     public IActionResult GetAll()
     {
@@ -38,6 +39,7 @@ public class StockController : ControllerBase
         return Ok(stocks.ToStockDto());
     }
 
+    // Post
     [HttpPost] // Posting Stock
     public IActionResult Create([FromBody] CreateStockRequestDto stockDto)
     {
@@ -53,6 +55,7 @@ public class StockController : ControllerBase
         );
     }
     
+    // Put
     [HttpPut("{id}")] // Updating Stock by Id
     public IActionResult Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
     {
@@ -73,5 +76,23 @@ public class StockController : ControllerBase
         _context.SaveChanges();
         
         return Ok(stockModel.ToStockDto());
+    }
+    
+    // Delete
+    [HttpDelete("{id}")]
+    public IActionResult Delete([FromRoute] int id) // Deleting Stock by Id
+    {
+        var stockModel = _context.Stocks.FirstOrDefault(s => s.Id == id);
+
+        if (stockModel == null)
+        {
+            return NotFound();
+        }
+
+        _context.Stocks.Remove(stockModel);
+
+        _context.SaveChanges();
+
+        return NoContent();
     }
 }
