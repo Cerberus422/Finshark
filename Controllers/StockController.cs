@@ -17,6 +17,7 @@ public class StockController : ControllerBase
         _context = context;
     }
 
+    // Get
     [HttpGet]   // All Stocks
 
     public IActionResult GetAllStocks()
@@ -24,6 +25,7 @@ public class StockController : ControllerBase
         var stocks = _context.Stocks
 		 .Select(s => s.ToStockDto())
 		 .ToList();
+        
         return Ok(stocks);
     }
     
@@ -35,6 +37,7 @@ public class StockController : ControllerBase
             .Include(s => s.Comments)
             .Select(s => s.ToStockWithCommentsDto())
             .ToList();
+        
         return Ok(stocks);
     }
     
@@ -48,10 +51,11 @@ public class StockController : ControllerBase
         {
             return NotFound();
         }
+        
         return Ok(stocks.ToStockDto());
     }
 
-	[HttpGet("stocks-with-comments/{id}")]  // Stocks with Comments by Id
+	[HttpGet("stock-with-comments/{id}")]  // Stocks with Comments by Id
 
     public IActionResult GetByIdStocksAndComments([FromRoute] int id)
     {
@@ -63,9 +67,12 @@ public class StockController : ControllerBase
         {
             return NotFound();
         }
+        
         return Ok(stocks.ToStockWithCommentsDto());
     }
 
+    
+    // Post
     [HttpPost]  // Posting Stock
     public IActionResult CreateStock([FromBody] CreateStockRequestDto stockDto)
     {
@@ -81,29 +88,7 @@ public class StockController : ControllerBase
             );
     }
     
-    [HttpPost("write-comments/{id}")] // Posting new Comment to existing Stock
-    public IActionResult CreateComment([FromRoute] int id, [FromBody] CreateCommentRequestDto commentDto)
-    {
-        var stockModel = _context.Stocks.Include(s => s.Comments).FirstOrDefault(s => s.Id == id);
-
-        if (stockModel == null)
-        {
-            return NotFound();
-        }
-
-        var comment = commentDto.ToCommentFromCreateDto();
-
-        comment.StockId  = id;
-        
-        _context.Comments.Add(comment);
-        _context.SaveChanges();
-        
-        var updatedStockModel = _context.Stocks.Include(s => s.Comments).FirstOrDefault(s => s.Id == id);
-
-        return Ok(updatedStockModel.ToStockWithCommentsDto());
-    }
-    
-    [HttpPost("write-stocks-and-comments")]  // Posting Stocks with Comments
+    [HttpPost("write-stock-and-comment")]  // Posting Stock with Comment
     public IActionResult CreateStockWithComments([FromBody] CreateStockRequestWithCommentsDto stockDto)
     {
         var stockModel = stockDto.ToStockFromCreateDto();
@@ -117,12 +102,36 @@ public class StockController : ControllerBase
             stockModel.ToStockWithCommentsDto()
         );
     }
+    
+    [HttpPost("write-comments/{id}")] // Posting new Comment to existing Stock
+    public IActionResult CreateComment([FromRoute] int id, [FromBody] CreateCommentRequestDto commentDto)
+    {
+        var stockModel = _context.Stocks
+            .Include(s => s.Comments)
+            .FirstOrDefault(s => s.Id == id);
 
+        if (stockModel == null)
+        {
+            return NotFound();
+        }
+
+        var comment = commentDto.ToCommentFromCreateDto();
+
+        comment.StockId  = id;
+        
+        _context.Comments.Add(comment);
+        _context.SaveChanges();
+
+        return Ok(stockModel.ToStockWithCommentsDto());
+    }
+    
+    // Update
     [HttpPut("update-stocks/{id}")] // Updating Stock by Id
 
     public IActionResult UpdateStocks([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
     {
-        var stockModel = _context.Stocks.FirstOrDefault(s => s.Id == id);
+        var stockModel = _context.Stocks
+            .FirstOrDefault(s => s.Id == id);
 
         if (stockModel == null)
         {
@@ -145,7 +154,9 @@ public class StockController : ControllerBase
 
     public IActionResult UpdateStocksWithComments([FromRoute] int id, [FromBody] UpdateStockWithCommentsRequestDto updateDto)
     {
-        var stockModel = _context.Stocks.Include(s => s.Comments).FirstOrDefault(s => s.Id == id);
+        var stockModel = _context.Stocks
+            .Include(s => s.Comments)
+            .FirstOrDefault(s => s.Id == id);
 
         if (stockModel == null)
         {
@@ -159,7 +170,7 @@ public class StockController : ControllerBase
         stockModel.Industry = updateDto.Industry;
         stockModel.MarketCap = updateDto.MarketCap;
         
-       foreach(var commentDto in updateDto.Comments)
+       foreach(var commentDto in updateDto.Comments) 
        {
            var comment = stockModel.Comments.FirstOrDefault(c => c.Id == commentDto.Id);
 
@@ -176,5 +187,23 @@ public class StockController : ControllerBase
         _context.SaveChanges();
         
         return Ok(stockModel.ToStockWithCommentsDto());
+    }
+    
+    // Delete
+    [HttpDelete("{id}")] // Deleting whole Stock with all comments
+    public IActionResult Delete([FromRoute] int id) // Deleting Stock by Id
+    {
+        var stockModel = _context.Stocks.FirstOrDefault(s => s.Id == id);
+
+        if (stockModel == null)
+        {
+            return NotFound();
+        }
+
+        _context.Stocks.Remove(stockModel);
+
+        _context.SaveChanges();
+
+        return NoContent();
     }
 }

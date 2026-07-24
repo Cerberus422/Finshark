@@ -89,7 +89,8 @@ namespace api.Migrations
                 {
                     b.HasOne("api.Models.Stock", "Stock")
                         .WithMany("Comments")
-                        .HasForeignKey("StockId");
+                        .HasForeignKey("StockId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Stock");
                 });
