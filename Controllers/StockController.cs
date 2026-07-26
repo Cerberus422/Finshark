@@ -150,45 +150,6 @@ public class StockController : ControllerBase
 
         return Ok(stockModel.ToStockDto());
     }
-
-    [HttpPut("update-stocks-and-comments/{id}")] // Updating Stock and Comments by Id
-
-    public async Task<IActionResult> UpdateStocksWithComments([FromRoute] int id, [FromBody] UpdateStockWithCommentsRequestDto updateDto)
-    {
-        var stockModel = await _context.Stocks
-            .Include(s => s.Comments)
-            .FirstOrDefaultAsync(s => s.Id == id);
-
-        if (stockModel == null)
-        {
-            return NotFound();
-        }
-        
-        stockModel.Symbol = updateDto.Symbol;
-        stockModel.CompanyName = updateDto.CompanyName;
-        stockModel.Purchase = updateDto.Purchase;
-        stockModel.LastDiv = updateDto.LastDiv;
-        stockModel.Industry = updateDto.Industry;
-        stockModel.MarketCap = updateDto.MarketCap;
-        
-       foreach(var commentDto in updateDto.Comments) 
-       {
-           var comment = stockModel.Comments.FirstOrDefault(c => c.Id == commentDto.Id);
-
-           if (comment == null)
-           {
-               continue;
-           }
-           
-           comment.Title = commentDto.Title;
-           comment.Content = commentDto.Content;
-           comment.CreatedOn = commentDto.CreatedOn;
-       }
-        
-        await _context.SaveChangesAsync();
-        
-        return Ok(stockModel.ToStockWithCommentsDto());
-    }
     
     // Delete
     [HttpDelete("{id}")] 
