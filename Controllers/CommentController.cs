@@ -1,5 +1,8 @@
 ﻿using api.Data;
+using api.Mappers;
+using api.Dtos.Comment;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers;
 
@@ -14,13 +17,34 @@ public class CommentController : ControllerBase
         _context = context;
     }
     
-    // Delete
-    [HttpDelete("{stockid}")]
-    public IActionResult DeleteAllComments([FromRoute] int stockid) // Deletes all Comments from one Stock ( leaves stock without any comments)
+    //Put
+    [HttpPut("stock/{stockid}/comment/{commentid}")]
+    public async Task<IActionResult> UpdateComments([FromRoute] int stockid, [FromRoute] int commentid, [FromBody] UpdateCommentsRequestDto updateDto) // // Updating Comments by Id of Stock and Comment
     {
-        var commentModel = _context.Comments
+      
+        var commentModel = await _context.Comments.FirstOrDefaultAsync(c => c.StockId == stockid && c.Id == commentid);
+        
+        if (commentModel == null)
+        {
+            return NotFound();
+        }
+        
+        commentModel.Title = updateDto.Title;
+        commentModel.Content = updateDto.Content;
+        commentModel.CreatedOn = updateDto.CreatedOn;
+        
+        await _context.SaveChangesAsync();
+        
+        return Ok(commentModel.ToCommentDto());
+    }
+    
+    // Delete
+    [HttpDelete("stock/{stockid}")]
+    public async Task<IActionResult> DeleteAllComments([FromRoute] int stockid) // Deletes all Comments from one Stock ( leaves stock without any comments)
+    {
+        var commentModel = await _context.Comments
             .Where(c => c.StockId == stockid)
-            .ToList();
+            .ToListAsync();
 
         
         if (commentModel.Count == 0)
@@ -28,18 +52,18 @@ public class CommentController : ControllerBase
             return NotFound();
         }
 
-        _context.Comments.RemoveRange(commentModel);
+         _context.Comments.RemoveRange(commentModel);
 
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return NoContent();
     }
     
-    [HttpDelete("{stockid}/{commentid}")]
-    public IActionResult DeleteOneComment([FromRoute] int stockid, int commentid) // Deletes one Comment from one Stock ( leaves stock with rest comments)
+    [HttpDelete("stock/{stockid}/comment/{commentid}")]
+    public async Task<IActionResult> DeleteOneComment([FromRoute] int stockid, int commentid) // Deletes one Comment from one Stock ( leaves stock with rest comments)
     {
-        var commentModel = _context.Comments
-            .FirstOrDefault(c => c.StockId == stockid && c.Id == commentid);
+        var commentModel = await _context.Comments
+            .FirstOrDefaultAsync(c => c.StockId == stockid && c.Id == commentid);
         
         if (commentModel == null)
         {
@@ -48,7 +72,7 @@ public class CommentController : ControllerBase
 
         _context.Comments.Remove(commentModel);
 
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return NoContent();
     }
