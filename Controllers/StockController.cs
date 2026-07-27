@@ -3,6 +3,7 @@ using api.Mappers;
 using api.Data;
 using api.Dtos.Stock;
 using api.Dtos.Comment;
+using api.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers;
@@ -12,8 +13,10 @@ namespace api.Controllers;
 public class StockController : ControllerBase
 {
     private readonly ApplicationDBContext _context;
-    public StockController(ApplicationDBContext context)
+    private readonly IStockRepository _stockRepo;
+    public StockController(ApplicationDBContext context, IStockRepository stockRepo)
     {
+        _stockRepo = stockRepo;
         _context = context;
     }
 
@@ -22,31 +25,29 @@ public class StockController : ControllerBase
 
     public async Task<IActionResult> GetAllStocks()
     {
-        var stocks =  await _context.Stocks.ToListAsync();
-		 
-        var stockDto = stocks.Select(s => s.ToStockDto());
+        var stocks = 
+            (await _stockRepo.GetallStockAsync())
+            .Select(s => s.ToStockDto());
         
-        return Ok(stockDto);
+        return Ok(stocks);
     }
     
     [HttpGet("stocks-with-comments")]   // All Stocks with Comments
 
     public async Task<IActionResult> GetAllStocksWithComments()
     {
-        var stocks = await _context.Stocks
-            .Include(s => s.Comments).ToListAsync();
+        var stocks = 
+            (await _stockRepo.GetallStockWithCommentsAsync())
+            .Select(s => s.ToStockWithCommentsDto());
 
-        var stockDtos = stocks.Select(s => s.ToStockWithCommentsDto());
-            
-        
-        return Ok(stockDtos);
+       return Ok(stocks);
     }
     
     [HttpGet("{id}")]   // Stock by Id
 
     public async Task<IActionResult> GetStockById([FromRoute] int id)
     {
-        var stocks = await _context.Stocks.FindAsync(id);
+        var stocks = await _stockRepo.GetStockByIdAsync(id);
 
         if (stocks == null)
         {
@@ -56,13 +57,11 @@ public class StockController : ControllerBase
         return Ok(stocks.ToStockDto());
     }
 
-	[HttpGet("stock-with-comments/{id}")]  // Stocks with Comments by Id
+	[HttpGet("stock-with-comments/{id}")]  // Stock with Comments by Id
 
-    public async Task<IActionResult> GetByIdStocksAndComments([FromRoute] int id)
+    public async Task<IActionResult> GetByIdStockAndComments([FromRoute] int id)
     {
-        var stocks = await _context.Stocks
-		 .Include(s => s.Comments)
-		 .FirstOrDefaultAsync(s => s.Id == id);
+        var stocks = await _stockRepo.GetStockWithCommentsByIdAsync(id);
 
         if (stocks == null)
         {
@@ -78,9 +77,8 @@ public class StockController : ControllerBase
     public async Task<IActionResult> CreateStock([FromBody] CreateStockRequestDto stockDto)
     {
         var stockModel = stockDto.ToStockFromCreateDTO();
-        
-        await  _context.Stocks.AddAsync(stockModel);
-        await _context.SaveChangesAsync();
+
+        await _stockRepo.CreateStockAsync(stockModel);
 
         return CreatedAtAction(
             nameof(GetStockById), 
@@ -93,12 +91,11 @@ public class StockController : ControllerBase
     public async Task<IActionResult> CreateStockWithComments([FromBody] CreateStockRequestWithCommentsDto stockDto)
     {
         var stockModel = stockDto.ToStockFromCreateDto();
-        
-        await _context.Stocks.AddAsync(stockModel);
-        await _context.SaveChangesAsync();
+
+        await _stockRepo.CreateStockAsync(stockModel);
 
         return CreatedAtAction(
-            nameof(GetByIdStocksAndComments), 
+            nameof(GetByIdStockAndComments), 
             new { id = stockModel.Id }, 
             stockModel.ToStockWithCommentsDto()
         );
@@ -107,9 +104,7 @@ public class StockController : ControllerBase
     [HttpPost("write-comments/{id}")] // Posting new Comment to existing Stock
     public async Task<IActionResult> CreateComment([FromRoute] int id, [FromBody] CreateCommentRequestDto commentDto)
     {
-        var stockModel = await _context.Stocks
-            .Include(s => s.Comments)
-            .FirstOrDefaultAsync(s => s.Id == id);
+        var stockModel = await _stockRepo.GetStockWithCommentsByIdAsync(id);
 
         if (stockModel == null)
         {
@@ -119,10 +114,9 @@ public class StockController : ControllerBase
         var comment = commentDto.ToCommentFromCreateDto();
 
         comment.StockId  = id;
-        
-        await _context.Comments.AddAsync(comment);
-        await _context.SaveChangesAsync();
 
+        await _stockRepo.CreateCommentAsync(comment);
+        
         return Ok(stockModel.ToStockWithCommentsDto());
     }
     
@@ -131,22 +125,12 @@ public class StockController : ControllerBase
 
     public async Task<IActionResult> UpdateStocks([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
     {
-        var stockModel = await _context.Stocks
-            .FirstOrDefaultAsync(s => s.Id == id);
+        var stockModel = await _stockRepo.UpdateAsync(id, updateDto);
 
         if (stockModel == null)
         {
             return NotFound();
         }
-        
-        stockModel.Symbol = updateDto.Symbol;
-        stockModel.CompanyName = updateDto.CompanyName;
-        stockModel.Purchase = updateDto.Purchase;
-        stockModel.LastDiv = updateDto.LastDiv;
-        stockModel.Industry = updateDto.Industry;
-        stockModel.MarketCap = updateDto.MarketCap;
-
-        await _context.SaveChangesAsync();
 
         return Ok(stockModel.ToStockDto());
     }
@@ -155,16 +139,12 @@ public class StockController : ControllerBase
     [HttpDelete("{id}")] 
     public async Task<IActionResult> Delete([FromRoute] int id) // Deleting whole Stock with all comments
     {
-        var stockModel = await _context.Stocks.FirstOrDefaultAsync(s => s.Id == id);
+        var stockModel = await _stockRepo.DeleteAsync(id);
 
         if (stockModel == null)
         {
             return NotFound();
         }
-
-        _context.Stocks.Remove(stockModel);
-
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }

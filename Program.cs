@@ -1,5 +1,7 @@
 using api.Models;
 using api.Data;
+using api.Interfaces;
+using api.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +22,9 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     );
 });
+
+builder.Services.AddScoped<IStockRepository, StockRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 
 var app = builder.Build();
 
