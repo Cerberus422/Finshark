@@ -13,7 +13,7 @@ namespace api.Controllers;
 public class StockController : ControllerBase
 {
     private readonly IStockRepository _stockRepo;
-    public StockController(ApplicationDBContext context, IStockRepository stockRepo)
+    public StockController(IStockRepository stockRepo)
     {
         _stockRepo = stockRepo;
     }
@@ -22,9 +22,8 @@ public class StockController : ControllerBase
     [HttpGet] // All Stocks
     public async Task<IActionResult> GetAll()
     {
-        var stocks = 
-            (await _stockRepo.GetallAsync()).
-            Select(s => s.ToStockDto());
+        var stocks =
+            (await _stockRepo.GetallAsync()).Select(s => s.ToStockDto());
         
         
         return Ok(stocks);

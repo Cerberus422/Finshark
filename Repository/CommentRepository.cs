@@ -16,4 +16,9 @@ public class CommentRepository : ICommentRepository
     {
         return await _context.Comments.ToListAsync();
     }
+
+    public async Task<Comment?> GetByIdAsync(int commentId)
+    {
+        return await _context.Comments.FindAsync(commentId);
+    }
 }
