@@ -45,14 +45,7 @@ public class StockRepository : IStockRepository
         
         return stockModel;
     }
-
-    public async Task<Comment> CreateCommentAsync(Comment comment)
-    {
-        await _context.Comments.AddAsync(comment);
-        await _context.SaveChangesAsync();
-
-        return comment;
-    }
+    
 
     public async Task<Stock?> UpdateAsync(int id, UpdateStockRequestDto stockDto)
     {

@@ -14,7 +14,6 @@ public interface IStockRepository
     
     // Post
     Task<Stock> CreateStockAsync(Stock stockModel); // Posting Stock
-    Task<Comment> CreateCommentAsync(Comment commentModel); // Posting new Comment to existing Stock
     
     // Put
     Task<Stock?> UpdateAsync(int id, UpdateStockRequestDto stockDto); // Updating Stock by Id
