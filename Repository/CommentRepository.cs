@@ -14,7 +14,20 @@ public class CommentRepository : ICommentRepository
     {
         _context = context;
     }
-   
+
+    public async Task<Comment?> GetByIdAsync(int commentId)
+    {
+        return await _context.Comments.FindAsync(commentId);
+    }
+
+    public async Task<Comment> CreateAsync(Comment commentModel)
+    {
+        await _context.Comments.AddAsync(commentModel);
+        await _context.SaveChangesAsync();
+
+        return commentModel;
+    }
+
     public async Task<Comment?> UpdateAsync(int stockid, int commentid, UpdateCommentsRequestDto updateDto)
     {
         var commentModel = 

@@ -5,6 +5,10 @@ namespace api.Interfaces;
 
 public interface ICommentRepository
 {
+    // Get
+    Task<Comment?> GetByIdAsync(int commentId); // Getting comment By Id
+    // Create
+    Task<Comment> CreateAsync(Comment commentModel); // Creating Comment 
     // Put
     Task<Comment?> UpdateAsync(int stockid, int commentid, UpdateCommentsRequestDto updateDto); // Updating Comments by Id of Stock and Comment
     

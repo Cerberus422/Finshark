@@ -5,7 +5,7 @@ namespace api.Mappers;
 
 public static class StockMappers
 {
-    public static StockDto ToStockDto(this Stock stockModel) // Get Stock
+    public static StockDto ToStockDto(this Stock stockModel) // Get Stocks
     {
         return new StockDto
         {
@@ -19,7 +19,7 @@ public static class StockMappers
         };
     }
     
-    public static StockWithCommentsDto ToStockWithCommentsDto(this Stock stockModel) // Get Stock with Comments
+    public static StockWithCommentsDto ToStockWithCommentsDto(this Stock stockModel) // Get Stocks with Comments
     {
         return new StockWithCommentsDto
         {

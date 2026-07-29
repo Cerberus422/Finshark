@@ -12,17 +12,46 @@ namespace api.Controllers;
 public class CommentController : ControllerBase
 {
 
-    private readonly ApplicationDBContext _context;
+   
     private readonly ICommentRepository _commentRepo;
-    public CommentController(ApplicationDBContext context, ICommentRepository commentRepo)
+    private readonly IStockRepository _stockRepo;
+    public CommentController(ICommentRepository commentRepo, IStockRepository stockRepo)
     {
         _commentRepo = commentRepo;
-        _context = context;
+        _stockRepo = stockRepo;
+    }
+    //Get
+    [HttpGet("stock-with-comments/{commentId}")]  // Comments by Id
+    public async Task<IActionResult> GetById([FromRoute] int commentId)
+    {
+        var comment = await _commentRepo.GetByIdAsync(commentId);
+
+        if (comment == null)
+        {
+            return BadRequest("Comment does not exist");
+        }
+        
+        return Ok(comment.ToCommentDto());
+    }
+    // Creaete
+    [HttpPost("write-comment/{stockId}")] // Posting new Comment to existing Stock
+    public async Task<IActionResult> CreateComment([FromRoute] int stockId, [FromBody] CreateCommentRequestDto commentDto)
+    {
+        if (!await _stockRepo.StockExists(stockId))
+        {
+            return BadRequest("Stock does not exist");
+        }
+        
+        var commentModel = commentDto.ToCommentFromCreateDto(stockId);
+
+        await _commentRepo.CreateAsync(commentModel);
+
+        return CreatedAtAction(nameof(GetById), new { commentId = commentModel.Id }, commentModel.ToCommentDto());
     }
     
     //Put
-    [HttpPut("stock/{stockid}/comment/{commentid}")]
-    public async Task<IActionResult> UpdateComments([FromRoute] int stockid, [FromRoute] int commentid, [FromBody] UpdateCommentsRequestDto updateDto) // Updating Comments by Id of Stock and Comment
+    [HttpPut("stock/{stockid}/comment/{commentid}")] // Updating Comments by Id of Stock and Comment
+    public async Task<IActionResult> UpdateComments([FromRoute] int stockid, [FromRoute] int commentid, [FromBody] UpdateCommentsRequestDto updateDto) 
     {
 
         var commentModel =
@@ -37,8 +66,8 @@ public class CommentController : ControllerBase
     }
     
     // Delete
-    [HttpDelete("stock/{stockid}")]
-    public async Task<IActionResult> DeleteAllComments([FromRoute] int stockid) // Deletes all Comments from one Stock ( leaves stock without any comments)
+    [HttpDelete("stock/{stockid}")] // Deletes all Comments from one Stock ( leaves stock without any comments)
+    public async Task<IActionResult> DeleteAllComments([FromRoute] int stockid) 
     {
         var commentModel = await _commentRepo.DeleteByStockIdAsync(stockid);
         
@@ -50,8 +79,8 @@ public class CommentController : ControllerBase
         return NoContent();
     }
     
-    [HttpDelete("stock/{stockid}/comment/{commentid}")]
-    public async Task<IActionResult> DeleteOneComment([FromRoute] int stockid, int commentid) // Deletes one Comment from one Stock ( leaves stock with rest comments)
+    [HttpDelete("stock/{stockid}/comment/{commentid}")] // Deletes one Comment from one Stock ( leaves stock with rest comments)
+    public async Task<IActionResult> DeleteOneComment([FromRoute] int stockid, int commentid) 
     {
         var commentModel = await _commentRepo.DeleteByStockAndCommentIdAsync(stockid, commentid);
             

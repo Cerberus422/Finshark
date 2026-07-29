@@ -21,4 +21,7 @@ public interface IStockRepository
     
     // Delete
     Task<Stock?> DeleteAsync(int id); // Deleting whole Stock with all comments
+    
+    // Checking
+    Task<bool> StockExists(int stockId); // Checking if Stock exists
 }

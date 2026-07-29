@@ -12,12 +12,11 @@ namespace api.Controllers;
 [ApiController]
 public class StockController : ControllerBase
 {
-    private readonly ApplicationDBContext _context;
+   
     private readonly IStockRepository _stockRepo;
-    public StockController(ApplicationDBContext context, IStockRepository stockRepo)
+    public StockController( IStockRepository stockRepo)
     {
         _stockRepo = stockRepo;
-        _context = context;
     }
 
     // Get
@@ -99,25 +98,6 @@ public class StockController : ControllerBase
             new { id = stockModel.Id }, 
             stockModel.ToStockWithCommentsDto()
         );
-    }
-    
-    [HttpPost("write-comments/{id}")] // Posting new Comment to existing Stock
-    public async Task<IActionResult> CreateComment([FromRoute] int id, [FromBody] CreateCommentRequestDto commentDto)
-    {
-        var stockModel = await _stockRepo.GetStockWithCommentsByIdAsync(id);
-
-        if (stockModel == null)
-        {
-            return NotFound();
-        }
-
-        var comment = commentDto.ToCommentFromCreateDto();
-
-        comment.StockId  = id;
-
-        await _stockRepo.CreateCommentAsync(comment);
-        
-        return Ok(stockModel.ToStockWithCommentsDto());
     }
     
     // Update
