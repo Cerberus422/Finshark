@@ -105,7 +105,7 @@ public class StockController : ControllerBase
 
     public async Task<IActionResult> UpdateStocks([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
     {
-        var stockModel = await _stockRepo.UpdateAsync(id, updateDto);
+        var stockModel = await _stockRepo.UpdateAsync(id, updateDto.ToStockFromUpdateDto());
 
         if (stockModel == null)
         {

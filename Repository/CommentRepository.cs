@@ -28,11 +28,11 @@ public class CommentRepository : ICommentRepository
         return commentModel;
     }
 
-    public async Task<Comment?> UpdateAsync(int stockid, int commentid, UpdateCommentsRequestDto updateDto)
+    public async Task<Comment?> UpdateAsync(int commentid, Comment updateDto)
     {
         var commentModel = 
             await _context.Comments
-                .FirstOrDefaultAsync(c => c.StockId == stockid && c.Id == commentid);
+                .FindAsync(commentid);
         
         if (commentModel == null)
         {
@@ -41,7 +41,6 @@ public class CommentRepository : ICommentRepository
         
         commentModel.Title = updateDto.Title;
         commentModel.Content = updateDto.Content;
-        commentModel.CreatedOn = updateDto.CreatedOn;
         
         await _context.SaveChangesAsync();
 
@@ -67,10 +66,10 @@ public class CommentRepository : ICommentRepository
         return commentModel;
     }
 
-    public async Task<Comment?> DeleteByStockAndCommentIdAsync(int stockid, int commentid)
+    public async Task<Comment?> DeleteByStockAndCommentIdAsync( int commentid)
     {
         var commentModel = await _context.Comments
-            .FirstOrDefaultAsync(c => c.StockId == stockid && c.Id == commentid);
+            .FindAsync(commentid);
         
         if (commentModel == null)
         {

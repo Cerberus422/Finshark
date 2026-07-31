@@ -50,12 +50,12 @@ public class CommentController : ControllerBase
     }
     
     //Put
-    [HttpPut("stock/{stockid}/comment/{commentid}")] // Updating Comments by Id of Stock and Comment
-    public async Task<IActionResult> UpdateComments([FromRoute] int stockid, [FromRoute] int commentid, [FromBody] UpdateCommentsRequestDto updateDto) 
+    [HttpPut("comment/{commentid}")] // Updating Comments 
+    public async Task<IActionResult> UpdateComments([FromRoute] int commentid, [FromBody] UpdateCommentsRequestDto updateDto) 
     {
 
         var commentModel =
-            await _commentRepo.UpdateAsync(stockid, commentid, updateDto);
+            await _commentRepo.UpdateAsync(commentid, updateDto.ToCommentFromUpdateDto());
         
         if (commentModel == null)
         {
@@ -79,10 +79,10 @@ public class CommentController : ControllerBase
         return NoContent();
     }
     
-    [HttpDelete("stock/{stockid}/comment/{commentid}")] // Deletes one Comment from one Stock ( leaves stock with rest comments)
-    public async Task<IActionResult> DeleteOneComment([FromRoute] int stockid, int commentid) 
+    [HttpDelete("comment/{commentid}")] // Deletes one Comment ( leaves stock with rest comments)
+    public async Task<IActionResult> DeleteOneComment([FromRoute]  int commentid) 
     {
-        var commentModel = await _commentRepo.DeleteByStockAndCommentIdAsync(stockid, commentid);
+        var commentModel = await _commentRepo.DeleteByStockAndCommentIdAsync( commentid);
             
         
         if (commentModel == null)

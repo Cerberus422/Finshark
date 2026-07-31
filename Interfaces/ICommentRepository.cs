@@ -10,9 +10,9 @@ public interface ICommentRepository
     // Create
     Task<Comment> CreateAsync(Comment commentModel); // Creating Comment 
     // Put
-    Task<Comment?> UpdateAsync(int stockid, int commentid, UpdateCommentsRequestDto updateDto); // Updating Comments by Id of Stock and Comment
+    Task<Comment?> UpdateAsync(int commentid, Comment updateDto); // Updating Comments by Id of Stock and Comment
     
     // Delete
     Task<List<Comment>?> DeleteByStockIdAsync(int stockid);  // Deletes all Comments from one Stock ( leaves stock without any comments)
-    Task<Comment?> DeleteByStockAndCommentIdAsync(int stockid, int commentid);// Deletes one Comment from one Stock ( leaves stock with rest comments)
+    Task<Comment?> DeleteByStockAndCommentIdAsync( int commentid);// Deletes one Comment ( leaves stock with rest comments)
 }

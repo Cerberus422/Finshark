@@ -66,4 +66,17 @@ public static class StockMappers
                 .ToList()
         };
     }
+    
+    public static Stock ToStockFromUpdateDto(this UpdateStockRequestDto stockModel) // Update Stock 
+    {
+        return new Stock
+        {
+            Symbol = stockModel.Symbol,
+            CompanyName = stockModel.CompanyName,
+            Purchase = stockModel.Purchase,
+            LastDiv = stockModel.LastDiv,
+            Industry = stockModel.Industry,
+            MarketCap = stockModel.MarketCap,
+         };
+    }
 }   
