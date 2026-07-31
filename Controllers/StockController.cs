@@ -79,7 +79,7 @@ public class StockController : ControllerBase
 
         if (stockModel == null)
         {
-            return NotFound("Comment does not exist");
+            return NotFound("Stock does not exist");
         }
 
         return NoContent();

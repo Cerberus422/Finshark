@@ -85,7 +85,7 @@ public class CommentController : ControllerBase
 
         if (comment == null)
         {
-            return NotFound();
+            return NotFound("Comment does not exist");
         }
 
         return NoContent();
