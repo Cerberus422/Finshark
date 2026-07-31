@@ -82,7 +82,7 @@ public class CommentController : ControllerBase
     [HttpDelete("comment/{commentid}")] // Deletes one Comment ( leaves stock with rest comments)
     public async Task<IActionResult> DeleteOneComment([FromRoute]  int commentid) 
     {
-        var commentModel = await _commentRepo.DeleteByStockAndCommentIdAsync( commentid);
+        var commentModel = await _commentRepo.DeleteByCommentIdAsync(commentid);
             
         
         if (commentModel == null)

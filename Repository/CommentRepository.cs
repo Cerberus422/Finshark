@@ -66,7 +66,7 @@ public class CommentRepository : ICommentRepository
         return commentModel;
     }
 
-    public async Task<Comment?> DeleteByStockAndCommentIdAsync( int commentid)
+    public async Task<Comment?> DeleteByCommentIdAsync( int commentid)
     {
         var commentModel = await _context.Comments
             .FindAsync(commentid);

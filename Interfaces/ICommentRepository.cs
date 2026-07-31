@@ -14,5 +14,5 @@ public interface ICommentRepository
     
     // Delete
     Task<List<Comment>?> DeleteByStockIdAsync(int stockid);  // Deletes all Comments from one Stock ( leaves stock without any comments)
-    Task<Comment?> DeleteByStockAndCommentIdAsync( int commentid);// Deletes one Comment ( leaves stock with rest comments)
+    Task<Comment?> DeleteByCommentIdAsync( int commentid);// Deletes one Comment ( leaves stock with rest comments)
 }
