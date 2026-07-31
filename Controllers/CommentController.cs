@@ -47,7 +47,7 @@ public class CommentController : ControllerBase
     
     // Post
     [HttpPost("{stockId}")] // Post Comment by StockId
-    public async Task<IActionResult> CreateComment([FromRoute] int stockId, [FromBody] CreateCommentRequestDto commentDto)
+    public async Task<IActionResult> Create([FromRoute] int stockId, [FromBody] CreateCommentRequestDto commentDto)
     {
         if (!await _stockRepo.StockExists(stockId))
         {
@@ -75,5 +75,19 @@ public class CommentController : ControllerBase
         }
 
         return Ok(comment.ToCommentDto());
+    }
+    
+    // Delete
+    [HttpDelete("{Id}")] // Delete Comment by Id
+    public async Task<IActionResult> Delete([FromRoute] int Id)
+    {
+        var comment = await _commentRepo.DeleteAsync(Id);
+
+        if (comment == null)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
     }
 }

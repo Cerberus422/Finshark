@@ -57,7 +57,7 @@ public class StockRepository : IStockRepository
 
     public async Task<Stock?> DeleteAsync(int id)
     {
-        var stockModel = await _context.Stocks.FirstOrDefaultAsync(s => s.Id == id);
+        var stockModel = await _context.Stocks.FindAsync(id);
 
         if (stockModel == null)
         {
