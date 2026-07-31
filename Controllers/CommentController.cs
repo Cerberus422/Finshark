@@ -19,8 +19,9 @@ public class CommentController : ControllerBase
         _stockRepo = stockRepo;
     }
 
+    // Get
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll() // Get all Comments
     {
         var comments = await _commentRepo.GetAllAsync();
 
@@ -29,7 +30,8 @@ public class CommentController : ControllerBase
         return Ok(commentDto);
     }
     
-    [HttpGet("{commentId}")]
+    
+    [HttpGet("{commentId}")] // Get Comment by Id
     public async Task<IActionResult> GetById([FromRoute] int commentId)
     {
         var comment = await _commentRepo.GetByIdAsync(commentId);
@@ -42,7 +44,9 @@ public class CommentController : ControllerBase
         return Ok(comment.ToCommentDto());
     }
     
-    [HttpPost("{stockId}")] 
+    
+    // Post
+    [HttpPost("{stockId}")] // Post Comment by StockId
     public async Task<IActionResult> CreateComment([FromRoute] int stockId, [FromBody] CreateCommentRequestDto commentDto)
     {
         if (!await _stockRepo.StockExists(stockId))
@@ -57,5 +61,19 @@ public class CommentController : ControllerBase
 
         return CreatedAtAction(nameof(GetById), new { commentId = commentModel.Id }, commentModel.ToCommentDto());
 
+    }
+    
+    // Update
+    [HttpPut("{Id}")] // Update Comment by Id
+    public async Task<IActionResult> Update([FromRoute] int Id, [FromBody] UpdateCommentRequestDto updateDto)
+    {
+        var comment = await _commentRepo.UpdateAsync(Id, updateDto.ToCommentFromUpdate());
+        
+        if (comment == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(comment.ToCommentDto());
     }
 }

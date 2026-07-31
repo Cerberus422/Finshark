@@ -28,4 +28,13 @@ public static class CommentMapper
            
         };
     }
+    
+    public static Comment ToCommentFromUpdate (this UpdateCommentRequestDto commentModel)
+    {
+        return new Comment
+        {
+            Title = commentModel.Title,
+            Content = commentModel.Content,
+        };
+    }
 }
