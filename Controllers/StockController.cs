@@ -22,6 +22,9 @@ public class StockController : ControllerBase
     [HttpGet] // All Stocks
     public async Task<IActionResult> GetAll()
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         var stocks =
             (await _stockRepo.GetallAsync()).Select(s => s.ToStockDto());
         
@@ -29,9 +32,12 @@ public class StockController : ControllerBase
         return Ok(stocks);
     }
 
-    [HttpGet("{id}")] // Stock by Id
+    [HttpGet("{id:int}")] // Stock by Id
     public async Task<IActionResult> GetById([FromRoute] int id)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         var stocks = await _stockRepo.GetByIdAsync(id);
  
         if (stocks == null)
@@ -46,6 +52,9 @@ public class StockController : ControllerBase
     [HttpPost] // Posting Stock
     public async  Task<IActionResult> Create([FromBody] CreateStockRequestDto stockDto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         var stockModel = stockDto.ToStockFromCreateDto();
 
         await _stockRepo.CreateAsync(stockModel);
@@ -58,9 +67,12 @@ public class StockController : ControllerBase
     }
     
     // Update
-    [HttpPut("{id}")] // Updating Stock by Id
+    [HttpPut("{id:int}")] // Updating Stock by Id
     public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         var stockModel = await _stockRepo.UpdateAsync(id, updateDto.ToStockFromUpdateDto());
 
         if (stockModel == null)
@@ -72,9 +84,12 @@ public class StockController : ControllerBase
     }
     
     // Delete
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete([FromRoute] int id) // Deleting Stock by Id
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         var stockModel = await _stockRepo.DeleteAsync(id);
 
         if (stockModel == null)
