@@ -101,7 +101,7 @@ public class StockController : ControllerBase
     }
     
     // Update
-    [HttpPut("update-stocks/{id}")] // Updating Stock by Id
+    [HttpPut("update-stocks/{id:int}")] // Updating Stock by Id
 
     public async Task<IActionResult> UpdateStocks([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
     {
@@ -116,7 +116,7 @@ public class StockController : ControllerBase
     }
     
     // Delete
-    [HttpDelete("{id}")] 
+    [HttpDelete("{id:int}")] 
     public async Task<IActionResult> Delete([FromRoute] int id) // Deleting whole Stock with all comments
     {
         var stockModel = await _stockRepo.DeleteAsync(id);

@@ -21,7 +21,7 @@ public class CommentController : ControllerBase
         _stockRepo = stockRepo;
     }
     //Get
-    [HttpGet("stock-with-comments/{commentId}")]  // Comments by Id
+    [HttpGet("stock-with-comments/{commentId:int}")]  // Comments by Id
     public async Task<IActionResult> GetById([FromRoute] int commentId)
     {
         var comment = await _commentRepo.GetByIdAsync(commentId);
@@ -34,7 +34,7 @@ public class CommentController : ControllerBase
         return Ok(comment.ToCommentDto());
     }
     // Creaete
-    [HttpPost("write-comment/{stockId}")] // Posting new Comment to existing Stock
+    [HttpPost("write-comment/{stockId:int}")] // Posting new Comment to existing Stock
     public async Task<IActionResult> CreateComment([FromRoute] int stockId, [FromBody] CreateCommentRequestDto commentDto)
     {
         if (!await _stockRepo.StockExists(stockId))
@@ -50,7 +50,7 @@ public class CommentController : ControllerBase
     }
     
     //Put
-    [HttpPut("comment/{commentid}")] // Updating Comments 
+    [HttpPut("comment/{commentid:int}")] // Updating Comments 
     public async Task<IActionResult> UpdateComments([FromRoute] int commentid, [FromBody] UpdateCommentsRequestDto updateDto) 
     {
 
@@ -66,7 +66,7 @@ public class CommentController : ControllerBase
     }
     
     // Delete
-    [HttpDelete("stock/{stockid}")] // Deletes all Comments from one Stock ( leaves stock without any comments)
+    [HttpDelete("stock/{stockid:int}")] // Deletes all Comments from one Stock ( leaves stock without any comments)
     public async Task<IActionResult> DeleteAllComments([FromRoute] int stockid) 
     {
         var commentModel = await _commentRepo.DeleteByStockIdAsync(stockid);
@@ -79,7 +79,7 @@ public class CommentController : ControllerBase
         return NoContent();
     }
     
-    [HttpDelete("comment/{commentid}")] // Deletes one Comment ( leaves stock with rest comments)
+    [HttpDelete("comment/{commentid:int}")] // Deletes one Comment ( leaves stock with rest comments)
     public async Task<IActionResult> DeleteOneComment([FromRoute]  int commentid) 
     {
         var commentModel = await _commentRepo.DeleteByCommentIdAsync(commentid);
