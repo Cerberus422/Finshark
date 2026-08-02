@@ -1,4 +1,5 @@
 ﻿using api.Dtos.Stock;
+using api.Helpers;
 using api.Models;
 
 namespace api.Interfaces;
@@ -7,8 +8,8 @@ public interface IStockRepository
 {
     
     // Get
-    Task<List<Stock>> GetallStockAsync(); // All Stocks
-    Task<List<Stock>> GetallStockWithCommentsAsync(); // All Stocks with Comments
+    Task<List<Stock>> GetallStockAsync(QueryObject query); // All Stocks
+    Task<List<Stock>> GetallStockWithCommentsAsync(QueryObject query); // All Stocks with Comments
     Task<Stock?> GetStockByIdAsync(int id); // Stock by Id
     Task<Stock?> GetStockWithCommentsByIdAsync(int id);  // Stock with Comments by Id
     

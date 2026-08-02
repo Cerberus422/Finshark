@@ -1,5 +1,6 @@
 ﻿using api.Data;
 using api.Dtos.Stock;
+using api.Helpers;
 using api.Interfaces;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
@@ -15,15 +16,41 @@ public class StockRepository : IStockRepository
         _context = context;
     }
         
-    public async Task<List<Stock>> GetallStockAsync()
+    public async Task<List<Stock>> GetallStockAsync(QueryObject query)
     {
-        return await _context.Stocks.ToListAsync();
+        var stock = _context.Stocks
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(query.Symbol))
+        {
+            stock = stock.Where(s => s.Symbol.Contains(query.Symbol));
+        }
+        
+        if (!string.IsNullOrWhiteSpace(query.CompanyName))
+        {
+            stock = stock.Where(s => s.CompanyName.Contains(query.CompanyName));
+        }
+
+        return await stock.ToListAsync();
     }
 
-    public async Task<List<Stock>> GetallStockWithCommentsAsync()
+    public async Task<List<Stock>> GetallStockWithCommentsAsync(QueryObject query)
     {
-        return await _context.Stocks
-            .Include(s => s.Comments).ToListAsync();
+        var stock = _context.Stocks
+            .Include(s => s.Comments)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(query.Symbol))
+        {
+            stock = stock.Where(s => s.Symbol.Contains(query.Symbol));
+        }
+        
+        if (!string.IsNullOrWhiteSpace(query.CompanyName))
+        {
+            stock = stock.Where(s => s.CompanyName.Contains(query.CompanyName));
+        }
+
+        return await stock.ToListAsync();
     }
 
     public async Task<Stock?> GetStockByIdAsync(int id)

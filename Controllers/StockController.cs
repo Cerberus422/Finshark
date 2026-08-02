@@ -3,6 +3,7 @@ using api.Mappers;
 using api.Data;
 using api.Dtos.Stock;
 using api.Dtos.Comment;
+using api.Helpers;
 using api.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,10 +23,10 @@ public class StockController : ControllerBase
     // Get
     [HttpGet]   // All Stocks
 
-    public async Task<IActionResult> GetAllStocks()
+    public async Task<IActionResult> GetAllStocks([FromQuery] QueryObject query)
     {
         var stocks = 
-            (await _stockRepo.GetallStockAsync())
+            (await _stockRepo.GetallStockAsync(query))
             .Select(s => s.ToStockDto());
         
         return Ok(stocks);
@@ -33,10 +34,10 @@ public class StockController : ControllerBase
     
     [HttpGet("stocks-with-comments")]   // All Stocks with Comments
 
-    public async Task<IActionResult> GetAllStocksWithComments()
+    public async Task<IActionResult> GetAllStocksWithComments([FromQuery] QueryObject query)
     {
         var stocks = 
-            (await _stockRepo.GetallStockWithCommentsAsync())
+            (await _stockRepo.GetallStockWithCommentsAsync(query))
             .Select(s => s.ToStockWithCommentsDto());
 
        return Ok(stocks);
