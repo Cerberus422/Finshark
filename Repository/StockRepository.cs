@@ -39,7 +39,9 @@ public class StockRepository : IStockRepository
             }
         }
 
-        return await stock.ToListAsync();
+        var skipNumber = (query.PageNumber - 1) * query.PageSize;
+
+        return await stock.Skip(skipNumber).Take(query.PageSize).ToListAsync();
     }
 
     public async Task<List<Stock>> GetallStockWithCommentsAsync(QueryObject query)
@@ -66,7 +68,10 @@ public class StockRepository : IStockRepository
             }
         }
         
-        return await stock.ToListAsync();
+        var skipNumber = (query.PageNumber - 1) * query.PageSize;
+
+        return await stock.Skip(skipNumber).Take(query.PageSize).ToListAsync();
+        
     }
 
     public async Task<Stock?> GetStockByIdAsync(int id)
