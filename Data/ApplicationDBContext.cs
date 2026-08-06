@@ -1,6 +1,7 @@
 ﻿using api.Mappers;
 using Microsoft.EntityFrameworkCore;
 using api.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace api.Data
@@ -24,6 +25,26 @@ namespace api.Data
                 .WithMany(s => s.Comments)
                 .HasForeignKey(c => c.StockId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            List<IdentityRole> roles = new List<IdentityRole>
+            {
+                new IdentityRole
+                {
+                    Id = "Admin",
+                    Name = "Admin",
+                    NormalizedName = "ADMIN",
+                    ConcurrencyStamp = "Admin",
+                },
+
+                new IdentityRole
+                {
+                    Id = "User",
+                    Name = "User",
+                    NormalizedName = "USER",
+                    ConcurrencyStamp = "User",
+                }
+            };
+            modelBuilder.Entity<IdentityRole>().HasData(roles);
         }
     }
 }

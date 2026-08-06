@@ -54,7 +54,8 @@ builder.Services.AddAuthentication(options =>
 
         IssuerSigningKey = new SymmetricSecurityKey(
             System.Text.Encoding.UTF8.GetBytes(
-                builder.Configuration["JWT:Audience"])
+                builder.Configuration["JWT:SigningKey"]
+            )
         )
     };
 });
