@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using api.Mappers;
 using api.Data;
 using api.Dtos.Stock;
 using api.Helpers;
 using api.Interfaces;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers;
@@ -21,6 +22,7 @@ public class StockController : ControllerBase
 
     // Get
     [HttpGet] // All Stocks
+    [Authorize]
     public async Task<IActionResult> GetAll([FromQuery] QueryObject query )
     {
         if (!ModelState.IsValid)
