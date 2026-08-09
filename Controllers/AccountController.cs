@@ -12,56 +12,44 @@ public class AccountController : ControllerBase
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly ITokenService _tokenService;
-    public AccountController(UserManager<AppUser> userManager, ITokenService tokenService)
+    private readonly IAuthService _authService;
+    public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, IAuthService authService)
     {
         _userManager = userManager;
         _tokenService = tokenService;
+        _authService = authService;
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
     {
-        try
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var user = await _authService.RegisterAsync(registerDto);
+
+        if (user == null)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var appUser = new AppUser
-            {
-                UserName = registerDto.Username,
-                Email = registerDto.Email
-            };
-
-            var createUser = await _userManager.CreateAsync(appUser, registerDto.Password);
-
-            if (createUser.Succeeded)
-            {
-                var roleResult = await _userManager.AddToRoleAsync(appUser, "User");
-
-                if (roleResult.Succeeded)
-                {
-                    return Ok(
-                        new NewUserDto()
-                        { 
-                           Username = appUser.UserName,
-                           Email  =  appUser.Email,
-                           Token = _tokenService.CreateToken(appUser)
-                        }
-                            );
-                }
-                else
-                {
-                    return StatusCode(500, roleResult.Errors);
-                }
-            }
-            else
-            {
-                return StatusCode(500, createUser.Errors);
-            }
+            return BadRequest("Unable to create user.");
         }
-        catch (Exception e)
+        
+        return Ok(user);
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var result = await _authService.LoginAsync(loginDto);
+
+        if (result == null)
         {
-            return StatusCode(500, e);
+            return Unauthorized("Invalid Username or Password");
         }
+
+        return Ok(result);
     }
 }
+
