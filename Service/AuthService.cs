@@ -20,7 +20,7 @@ public class AuthService : IAuthService
         _tokenService = tokenService;
     }
 
-    public async Task<NewUserDto?> RegisterAsync(RegisterDto registerDto)
+    public async Task<RegisterResult> RegisterAsync(RegisterDto registerDto)
     {
         var appUser = new AppUser
         {
@@ -36,16 +36,22 @@ public class AuthService : IAuthService
 
             if (roleResult.Succeeded)
             {
-                return new NewUserDto
+                return new RegisterResult
+                {
+                    User = new NewUserDto()
                     {
                         Username = appUser.UserName,
                         Email = appUser.Email,
                         Token = _tokenService.CreateToken(appUser)
-                    };
-            }
+                    }
+                };
+            }   
         }
 
-        return null;
+        return new RegisterResult
+        {
+            Errors = createUser.Errors
+        };
     }
 
     public async Task<NewUserDto?> LoginAsync(LoginDto loginDto)

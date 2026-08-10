@@ -26,14 +26,14 @@ public class AccountController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var user = await _authService.RegisterAsync(registerDto);
+        var result = await _authService.RegisterAsync(registerDto);
 
-        if (user == null)
+        if (result.Errors.Any())
         {
-            return BadRequest("Unable to create user.");
+            return BadRequest(result.Errors);
         }
         
-        return Ok(user);
+        return Ok(result.User);
     }
 
     [HttpPost("login")]
