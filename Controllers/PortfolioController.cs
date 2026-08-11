@@ -24,13 +24,24 @@ public class PortfolioController : ControllerBase
         _portfolioRepository = portfolioRepository;
     }
 
-    [HttpGet]
+    [HttpGet("api/portfolios")]
     [Authorize]
     public async  Task<IActionResult> GetUserPortfolio()
     {
         var username = User.GetUsername();
         var appUser = await _userManager.FindByNameAsync(username);
         var userPortfolio = await _portfolioRepository.GetUserPortfolio(appUser);
+
+        return Ok(userPortfolio);
+    }
+    
+    [HttpGet("api/portfolios-with-comments")]
+    [Authorize]
+    public async  Task<IActionResult> GetUserPortfoliowithComm()
+    {
+        var username = User.GetUsername();
+        var appUser = await _userManager.FindByNameAsync(username);
+        var userPortfolio = await _portfolioRepository.GetUserPortfolioWithComments(appUser);
 
         return Ok(userPortfolio);
     }

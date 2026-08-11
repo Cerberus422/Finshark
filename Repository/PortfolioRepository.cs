@@ -1,4 +1,6 @@
 ﻿using api.Data;
+using api.Dtos.Comment;
+using api.Dtos.Stock;
 using api.Interfaces;
 using api.Models;
 using Microsoft.AspNetCore.Identity;
@@ -15,10 +17,10 @@ public class PortfolioRepository : IPortfolioRepository
         _context = context;
     }
 
-    public async Task<List<Stock>> GetUserPortfolio(AppUser user)
+    public async Task<List<StockDto>> GetUserPortfolio(AppUser user)
     {
         return await _context.Portfolios.Where(u => u.AppUserId == user.Id)
-            .Select(stock => new Stock
+            .Select(stock => new StockDto
             {
                 Id = stock.StockId,
                 Symbol = stock.Stock.Symbol,
@@ -26,8 +28,33 @@ public class PortfolioRepository : IPortfolioRepository
                 Purchase = stock.Stock.Purchase,
                 LastDiv = stock.Stock.LastDiv,
                 Industry = stock.Stock.Industry,
-                MarketCap = stock.Stock.MarketCap
+                MarketCap = stock.Stock.MarketCap,
                 
+            }).ToListAsync();
+    }
+    
+    public async Task<List<StockWithCommentsDto>> GetUserPortfolioWithComments(AppUser user)
+    {
+        return await _context.Portfolios.Where(u => u.AppUserId == user.Id)
+            .Select(stock => new StockWithCommentsDto
+            {
+                Id = stock.StockId,
+                Symbol = stock.Stock.Symbol,
+                CompanyName = stock.Stock.CompanyName,
+                Purchase = stock.Stock.Purchase,
+                LastDiv = stock.Stock.LastDiv,
+                Industry = stock.Stock.Industry,
+                MarketCap = stock.Stock.MarketCap,
+                
+                Comments = stock.Stock.Comments.Select(c => new CommentDto
+                {
+                    Id = c.Id,
+                    Title = c.Title,
+                    Content = c.Content,
+                    CreatedOn = c.CreatedOn
+                
+                }).ToList()
+            
             }).ToListAsync();
     }
 }
