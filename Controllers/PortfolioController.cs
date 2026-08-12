@@ -1,4 +1,5 @@
-﻿using api.Extensions;
+﻿using System.Runtime.InteropServices.ComTypes;
+using api.Extensions;
 using api.Interfaces;
 using api.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -24,7 +25,7 @@ public class PortfolioController : ControllerBase
         _portfolioRepository = portfolioRepository;
     }
 
-    [HttpGet()]
+    [HttpGet]
     [Authorize]
     public async  Task<IActionResult> GetUserPortfolio()
     {
@@ -46,7 +47,7 @@ public class PortfolioController : ControllerBase
         return Ok(userPortfolio);
     }
     
-    [HttpGet()]
+    [HttpPost]
     [Authorize]
     public async  Task<IActionResult> AddPortfolio(string symbol)
     {
@@ -79,5 +80,29 @@ public class PortfolioController : ControllerBase
         {
             return Created();
         }
+    }
+
+    [HttpDelete]
+    [Authorize]
+
+    public async Task<IActionResult> DeltePortfolio(string symbol)
+    {
+        var username = User.GetUsername();
+        var appUser = await _userManager.FindByNameAsync(username);
+
+        var userPortfolio = await _portfolioRepository.GetUserPortfolio(appUser);
+
+        var filterStock = userPortfolio.Where(s => s.Symbol.ToLower() == symbol.ToLower()).ToList();
+
+        if (filterStock.Count() == 1)
+        {
+            await _portfolioRepository.DeletePortfolio(appUser, symbol);
+        }
+        else
+        {
+            return BadRequest("Stock not in your Portfolio");
+        }
+
+        return Ok();
     }
 }
