@@ -7,4 +7,5 @@ public interface IPortfolioRepository
 {
     Task<List<StockDto>> GetUserPortfolio(AppUser user);
     Task<List<StockWithCommentsDto>> GetUserPortfolioWithComments(AppUser user);
+    Task<Portfolio> CreateAsync(Portfolio portfolio);
 }

@@ -11,6 +11,7 @@ public interface IStockRepository
     Task<List<Stock>> GetallStockAsync(QueryObject query); // All Stocks
     Task<List<Stock>> GetallStockWithCommentsAsync(QueryObject query); // All Stocks with Comments
     Task<Stock?> GetStockByIdAsync(int id); // Stock by Id
+    Task<Stock?> GetStockBySymbolAsync(string symbol); // Stock by Symbol
     Task<Stock?> GetStockWithCommentsByIdAsync(int id);  // Stock with Comments by Id
     
     // Post

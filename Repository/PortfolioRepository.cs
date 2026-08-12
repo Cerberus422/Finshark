@@ -57,4 +57,12 @@ public class PortfolioRepository : IPortfolioRepository
             
             }).ToListAsync();
     }
+
+    public async Task<Portfolio> CreateAsync(Portfolio portfolio)
+    {
+        await _context.AddAsync(portfolio);
+        await _context.SaveChangesAsync();
+
+        return portfolio;
+    }
 }
