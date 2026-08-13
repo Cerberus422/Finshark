@@ -51,8 +51,9 @@ public class PortfolioRepository : IPortfolioRepository
                     Id = c.Id,
                     Title = c.Title,
                     Content = c.Content,
-                    CreatedOn = c.CreatedOn
-                
+                    CreatedOn = c.CreatedOn,
+                    CreatedBy = c.AppUser.UserName
+                    
                 }).ToList()
             
             }).ToListAsync();

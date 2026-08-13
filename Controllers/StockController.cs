@@ -3,9 +3,12 @@ using api.Mappers;
 using api.Data;
 using api.Dtos.Stock;
 using api.Dtos.Comment;
+using api.Extensions;
 using api.Helpers;
 using api.Interfaces;
+using api.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers;
@@ -16,9 +19,12 @@ public class StockController : ControllerBase
 {
    
     private readonly IStockRepository _stockRepo;
-    public StockController( IStockRepository stockRepo)
+    private readonly UserManager<AppUser> _userManager;
+
+    public StockController( IStockRepository stockRepo, UserManager<AppUser> userManager)
     {
         _stockRepo = stockRepo;
+        _userManager = userManager;
     }
 
     // Get
@@ -89,12 +95,22 @@ public class StockController : ControllerBase
     }
     
     [HttpPost("write-stock-and-comment")]  // Posting Stock with Comment
+    [Authorize]
     public async Task<IActionResult> CreateStockWithComments([FromBody] CreateStockRequestWithCommentsDto stockDto)
     {
         var stockModel = stockDto.ToStockFromCreateDto();
+        
+        var username = User.GetUsername();
 
+        var appUser = await _userManager.FindByNameAsync(username);
+
+        foreach (var comment in stockModel.Comments)
+        {
+            comment.AppUserId = appUser.Id;
+        }
+        
         await _stockRepo.CreateStockAsync(stockModel);
-
+        
         return CreatedAtAction(
             nameof(GetByIdStockAndComments), 
             new { id = stockModel.Id }, 

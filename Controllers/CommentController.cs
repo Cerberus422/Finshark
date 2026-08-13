@@ -1,7 +1,11 @@
 ﻿using api.Data;
 using api.Mappers;
 using api.Dtos.Comment;
+using api.Extensions;
 using api.Interfaces;
+using api.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,10 +19,12 @@ public class CommentController : ControllerBase
    
     private readonly ICommentRepository _commentRepo;
     private readonly IStockRepository _stockRepo;
-    public CommentController(ICommentRepository commentRepo, IStockRepository stockRepo)
+    private readonly UserManager<AppUser> _userManager;
+    public CommentController(ICommentRepository commentRepo, IStockRepository stockRepo, UserManager<AppUser> userManager)
     {
         _commentRepo = commentRepo;
         _stockRepo = stockRepo;
+        _userManager = userManager;
     }
     //Get
     [HttpGet("stock-with-comments/{commentId:int}")]  // Comments by Id
@@ -35,6 +41,7 @@ public class CommentController : ControllerBase
     }
     // Creaete
     [HttpPost("write-comment/{stockId:int}")] // Posting new Comment to existing Stock
+    [Authorize]
     public async Task<IActionResult> CreateComment([FromRoute] int stockId, [FromBody] CreateCommentRequestDto commentDto)
     {
         if (!await _stockRepo.StockExists(stockId))
@@ -42,8 +49,14 @@ public class CommentController : ControllerBase
             return BadRequest("Stock does not exist");
         }
         
-        var commentModel = commentDto.ToCommentFromCreateDto(stockId);
+        var username = User.GetUsername();
 
+        var appUser = await _userManager.FindByNameAsync(username);
+        
+        var commentModel = commentDto.ToCommentFromCreateDto(stockId);
+        
+        commentModel.AppUserId = appUser.Id;
+        
         await _commentRepo.CreateAsync(commentModel);
 
         return CreatedAtAction(nameof(GetById), new { commentId = commentModel.Id }, commentModel.ToCommentDto());
@@ -53,9 +66,10 @@ public class CommentController : ControllerBase
     [HttpPut("comment/{commentid:int}")] // Updating Comments 
     public async Task<IActionResult> UpdateComments([FromRoute] int commentid, [FromBody] UpdateCommentsRequestDto updateDto) 
     {
-
+        
         var commentModel =
             await _commentRepo.UpdateAsync(commentid, updateDto.ToCommentFromUpdateDto());
+        
         
         if (commentModel == null)
         {

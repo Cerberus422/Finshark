@@ -85,7 +85,7 @@ public class PortfolioController : ControllerBase
     [HttpDelete]
     [Authorize]
 
-    public async Task<IActionResult> DeltePortfolio(string symbol)
+    public async Task<IActionResult> DeletePortfolio(string symbol)
     {
         var username = User.GetUsername();
         var appUser = await _userManager.FindByNameAsync(username);

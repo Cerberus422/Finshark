@@ -12,7 +12,8 @@ public static class CommentMappers
             Id = commentModel.Id,
             Title = commentModel.Title,
             Content = commentModel.Content,
-            CreatedOn = commentModel.CreatedOn
+            CreatedOn = commentModel.CreatedOn,
+            CreatedBy = commentModel.AppUser.UserName
         };
     }
     
